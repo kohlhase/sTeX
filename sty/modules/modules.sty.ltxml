@@ -356,8 +356,7 @@ DefConstructor('\@symdef@construct@presentation{}{}{}{}{} OptionalKeyVals:symdef
   $document->openElement($appElement) if $nargs;
   my $cr="fun" if $nargs;
   $document->openElement('m:apply') if (scalar(@bargs));
-####@DG: $name needs to become the content of the csymbol here
-  $document->insertElement('m:csymbol',undef,(cd=>$cd,name=>$name,cr=>$cr));
+  $document->insertElement('m:csymbol',$name,(cd=>$cd,cr=>$cr));
   if (scalar(@bargs)) {
     foreach my $barg(@bargs) {
       $document->insertElement('omdoc:expr',undef,(name=>"arg$barg"));
@@ -365,16 +364,17 @@ DefConstructor('\@symdef@construct@presentation{}{}{}{}{} OptionalKeyVals:symdef
     $document->closeElement('m:apply');
   }
   if (scalar(@bvars) || scalar(@bargs)) {
-####@DG we need to wrap the bvar around all the individual variables
-    $document->openElement('m:bvar');
     if ((scalar(@bvars)==1) && ($bvars[0] != $assocarg)) {
+      $document->openElement('m:bvar');
       $document->insertElement('omdoc:expr',undef,(name=>"arg".$bvars[0]));
+      $document->closeElement('m:bvar');
     } else {
       $document->openElement('omdoc:exprlist',(name=>"args"));
+      $document->openElement('m:bvar');
       $document->insertElement('omdoc:expr',undef,(name=>"arg"));
+      $document->closeElement('m:bvar');
       $document->closeElement('omdoc:exprlist');
     }
-    $document->closeElement('m:bvar');
   }
   for my $id (1..$nargs) {
     next if (grep {$id==$_} (@bvars,@bargs));
