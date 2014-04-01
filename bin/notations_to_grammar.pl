@@ -8,10 +8,13 @@ use feature 'switch';
 use XML::LibXML;
 use Data::Dumper;
 $Data::Dumper::Sortkeys = 1;
+# Prepare STDERR and STDOUT for outputing Unicode characters
+binmode(STDERR,':encoding(UTF-8)');
+binmode(STDOUT,':encoding(UTF-8)');
 
 # Traverse and Scan for OMDoc files
 # e.g. 
-# sTeX/bin$ perl notations2grammar.pl ~/localmh/MathHub/smglom/smglom/source/
+# sTeX/bin$ perl notations_to_grammar.pl ~/localmh/MathHub/smglom/smglom/source/
 my $root_directory = shift;
 
 # Example of a generic Marpa grammar rule:
@@ -38,18 +41,18 @@ foreach my $omdoc_file(@omdoc_files[0..10]) {
 		my $uname = $notation->getAttribute('cd').'__'.$notation->getAttribute('name');
 		# The first two non-empty children are the prototype and rendering
 		my ($prototype,$rendering) = grep {ref $_ eq 'XML::LibXML::Element'} $notation->childNodes;
-		print STDERR "Name: $uname\n";
-		print STDERR "P: ",$prototype->toString(1),"\n\n";
-		print STDERR "R: ",$rendering->toString(1),"\n\n";
+		# print STDERR "Name: $uname\n";
+		# print STDERR "P: ",$prototype->toString(1),"\n\n";
+		# print STDERR "R: ",$rendering->toString(1),"\n\n";
 		# For each notation we have to generic rules:
 		# The main notation rule, which carries the semantics, and has a RHS of its rendering
-		push @rules, {lhs=>$uname, rhs=>"$uname:rendering", action=>construct_action($prototype->firstChild)};
+		push @rules, {lhs=>$uname, rhs=>$uname."__rendering", action=>construct_action($prototype->firstChild)};
 		# The generic principle that every notation is an expression, which can be used as an argument in other notations
 		push @rules, {lhs=>'Expression', rhs=>$uname};
 		# Construct the necessary grammar rules for this rendering (via recursive DFS traversal)
 		my @constructed_rules = @{construct_rules($rendering)};
 		# The first returned rule is the rule for the XML root of the rendering, and hence the main :rendering grammar rule
-		$constructed_rules[0]->{lhs} = "$uname:rendering";
+		$constructed_rules[0]->{lhs} = $uname."__rendering";
 		# Add to our collection of rules
 		push @rules, @constructed_rules;
 	}
@@ -68,8 +71,19 @@ foreach my $rule(@rules) {
 		push @{$unique_rules{$lhs}}, $rule; } }
 
 # Print our pre-grammar datastructure:
-print STDERR "Constructed rules: \n";
-print STDERR Dumper(\%unique_rules);
+# print STDERR "Constructed rules: \n";
+# print STDERR Dumper(\%unique_rules);
+
+# Create the BNF form:
+my $BNF = ":start ::= Expression\n";
+foreach my $LHS(sort keys %unique_rules) {
+	foreach my $subrule (@{$unique_rules{$LHS}}) {
+		my $RHS = $subrule->{rhs};
+		$BNF .= "$LHS ::= $RHS\n";
+	}
+}
+print STDERR "\n===\nBNF Form\n===\n";
+print STDERR $BNF;
 
 # TODO: Continue from here to create the BNF that Marpa::R2 understands
 # TODO: Add support for the remaining MathML elements - msub, msup and so on.
