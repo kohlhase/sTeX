@@ -98,30 +98,34 @@
 \addmetakey{symdef}{subject}
 \addmetakey*{symdef}{display}
 \def\symdef{\@ifnextchar[{\@symdef}{\@symdef[]}}
-\def\@symdef[#1]#2{\@ifnextchar[{\@@symdef[#1]{#2}}{\@@symdef[#1]{#2}[0]}}
+\def\@symdef[#1]#2{\@ifnextchar[{\@@symdef[#1]{#2}{math}}{\@@symdef[#1]{#2}{math}[0]}}
+\def\verbdef{\@ifnextchar[{\@verbdef}{\@verbdef[]}}
+\def\@verbdef[#1]#2{\@ifnextchar[{\@@symdef[#1]{#2}{text}}{\@@symdef[#1]{#2}{text}[0]}}
 \def\@mod@nc#1{\mod@newcommand{#1}[1]}
-\def\@@symdef[#1]#2[#3]#4{%
+\def\@@symdef[#1]#2#3[#4]#5{%
 \@symdeflocalfalse\metasetkeys{symdef}{#1}%
-\expandafter\mod@newcommand\csname modules@#2@pres@\endcsname[#3]{#4}%
+\expandafter\mod@newcommand\csname modules@#2@#3@\endcsname[#4]{#5}%
 \expandafter\mod@newcommand\csname #2\endcsname[1][]%
-{\csname modules@#2@pres@##1\endcsname}%
+{\ifmmode\csname modules@#2@math@##1\endcsname%
+\else\csname modules@#2@text@##1\endcsname\fi}%
 \expandafter\@mod@nc\csname mod@symref@#2\expandafter\endcsname\expandafter%
 {\expandafter\mod@termref\expandafter{\mod@id}{#2}{##1}}%
 \if@symdeflocal\else%
 \@ifundefined{mod@id}{}{%
 \expandafter\g@addto@macro\this@module%
-{\expandafter\mod@newcommand\csname modules@#2@pres@\endcsname[#3]{#4}}%
+{\expandafter\mod@newcommand\csname modules@#2@#3@\endcsname[#4]{#5}}%
 \expandafter\g@addto@macro\this@module%
 {\expandafter\mod@newcommand\csname #2\endcsname[1][]%
-{\csname modules@#2@pres@##1\endcsname}}%
+{\ifmmode\csname modules@#2@math@##1\endcsname%
+\else\csname modules@#2@text@##1\endcsname\fi}}%
 \expandafter\g@addto@macro\csname  module@defs@\mod@id\expandafter\endcsname\expandafter%
 {\expandafter\@mod@nc\csname mod@symref@#2\expandafter\endcsname\expandafter%
 {\expandafter\mod@termref\expandafter{\mod@id}{#2}{##1}}}%
 \ifmod@qualified%
 \expandafter\g@addto@macro\this@qualified@module%
-{\expandafter\mod@newcommand\csname modules@#2@pres@qualified\endcsname[#3]{#4}}%
+{\expandafter\mod@newcommand\csname modules@#2@#3@qualified\endcsname[#4]{#5}}%
 \expandafter\g@addto@macro\this@qualified@module%
-{\expandafter\def\csname#2atqualified\endcsname{\csname modules@#2@pres@qualified\endcsname}}%
+{\expandafter\def\csname#2atqualified\endcsname{\csname modules@#2@#3@qualified\endcsname}}%
 \fi}% mod@qualified
 \fi% symdeflocal
 \ifmod@show
@@ -129,12 +133,14 @@
 \ifx\symdef@title\@empty~\else~(\stDMemph{\symdef@title})\par\fi
 \fi}% mod@show
 \def\symdef@type{Symbol}
-\def\symvariant#1{\@ifnextchar[{\@symvariant{#1}}{\@symvariant{#1}[0]}}
-\def\@symvariant#1[#2]#3#4{%
-\expandafter\mod@newcommand\csname modules@#1@pres@#3\endcsname[#2]{#4}%
+\def\symvariant#1{\@ifnextchar[{\@symvariant{#1}{math}}{\@symvariant{#1}{math}[0]}}
+\def\@symvariant#1#2[#3]#4#5{%
+\expandafter\mod@newcommand\csname modules@#1@#2@#4\endcsname[#3]{#5}%
 \@ifundefined{mod@id}{}{%
 \expandafter\g@addto@macro\this@module%
-{\expandafter\mod@newcommand\csname modules@#1@pres@#3\endcsname[#2]{#4}}}}%
+{\expandafter\mod@newcommand\csname modules@#1@#2@#4\endcsname[#3]{#5}}}}%
+\def\verbvariant#1{\@ifnextchar[{\@symvariant{#1}{text}}{\@symvariant{#1}{text}[0]}}
+
 \def\resymdef{\@ifnextchar[{\@resymdef}{\@resymdef[]}}
 \def\@resymdef[#1]#2{\@ifnextchar[{\@@resymdef[#1]{#2}}{\@@resymdef[#1]{#2}[0]}}
 \def\@@resymdef[#1]#2[#3]#4{\PackageError{modules}

@@ -1068,10 +1068,20 @@
 % \end{macro}
 % \ednote{MK@MK: we need to document the binder keys above.}
 % \begin{macro}{\symdef}
-%    The the |\symdef|, and |\@symdef| macros just handle optional arguments.
+%    The the |\symdef|, and |\@symdef| macros just handle optional arguments and hand off
+%    processing for in math mode to |\@@symdef|.
 %    \begin{macrocode}
 \def\symdef{\@ifnextchar[{\@symdef}{\@symdef[]}}
-\def\@symdef[#1]#2{\@ifnextchar[{\@@symdef[#1]{#2}}{\@@symdef[#1]{#2}[0]}}
+\def\@symdef[#1]#2{\@ifnextchar[{\@@symdef[#1]{#2}{math}}{\@@symdef[#1]{#2}{math}[0]}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\verbdef}
+%   The the |\verbdef|, and |\@verbdef| macros just handle optional arguments, and hand
+%   off processing for text mode to |\@@symdef|.
+%    \begin{macrocode}
+\def\verbdef{\@ifnextchar[{\@verbdef}{\@verbdef[]}}
+\def\@verbdef[#1]#2{\@ifnextchar[{\@@symdef[#1]{#2}{text}}{\@@symdef[#1]{#2}{text}[0]}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -1084,7 +1094,7 @@
 %    now comes the real meat: the |\@@symdef| macro does two things, it adds the macro
 %    definition to the macro definition pool of the current module and also provides it.
 %    \begin{macrocode}
-\def\@@symdef[#1]#2[#3]#4{%
+\def\@@symdef[#1]#2#3[#4]#5{%
 %    \end{macrocode}
 % We use a switch to keep track of the local optional argument. We initialize the switch
 % to false and set all the keys that have been provided as arguments: |name|, |local|.
@@ -1092,16 +1102,17 @@
 \@symdeflocalfalse\metasetkeys{symdef}{#1}%
 %    \end{macrocode}
 % First, using |\mod@newcommand| we initialize the intermediate macro
-% |\module@|\meta{sym}|@pres@|, the one that can be extended with |\symvariant|
+% |\modules@|\meta{sym}|@|\meta{mode}|@|, the one that can be extended with |\symvariant|
 %    \begin{macrocode}
-\expandafter\mod@newcommand\csname modules@#2@pres@\endcsname[#3]{#4}%
+\expandafter\mod@newcommand\csname modules@#2@#3@\endcsname[#4]{#5}%
 %    \end{macrocode}
-% and then we define the actual semantic macro, which when invoked with an optional
-% argument \meta{opt} calls |\modules@|\meta{sym}|@pres@|\meta{opt} provided by the
-% |\symvariant| macro.
+% and then we define the actual semantic macro |\|\meta{sym}, which when invoked with an
+% optional argument \meta{opt} calls |\modules@|\meta{sym}|@|\meta{mode}|@|\meta{opt}
+% provided by the |\symvariant| macro.
 %    \begin{macrocode}
 \expandafter\mod@newcommand\csname #2\endcsname[1][]%
-{\csname modules@#2@pres@##1\endcsname}%
+{\ifmmode\csname modules@#2@math@##1\endcsname%
+\else\csname modules@#2@text@##1\endcsname\fi}%
 %    \end{macrocode}
 % Finally, we prepare the internal macro to be used in the |\symref| call.
 %    \begin{macrocode}
@@ -1117,17 +1128,18 @@
 %    \end{macrocode}
 % Otherwise, we add three functions to the module's pool of defined macros using
 % |\g@addto@macro|. We first add the definition of the intermediate function
-% |\modules@|\meta{sym}|@pres@|.
+% |\modules@|\meta{sym}|@|\meta{mode}|@|.
 %    \begin{macrocode}
 \expandafter\g@addto@macro\this@module%
-{\expandafter\mod@newcommand\csname modules@#2@pres@\endcsname[#3]{#4}}%
+{\expandafter\mod@newcommand\csname modules@#2@#3@\endcsname[#4]{#5}}%
 %    \end{macrocode}
 % Then we add add the definition of |\|\meta{sym}  which calls the intermediate
 % function and handles the optional argument.
 %    \begin{macrocode}
 \expandafter\g@addto@macro\this@module%
 {\expandafter\mod@newcommand\csname #2\endcsname[1][]%
-{\csname modules@#2@pres@##1\endcsname}}%
+{\ifmmode\csname modules@#2@math@##1\endcsname%
+\else\csname modules@#2@text@##1\endcsname\fi}}%
 %    \end{macrocode}
 % We also add |\mod@symref@|\meta{sym} macro to the macro pool so that the |\symref| macro
 % can pick it up.
@@ -1141,9 +1153,9 @@
 %    \begin{macrocode}
 \ifmod@qualified%
 \expandafter\g@addto@macro\this@qualified@module%
-{\expandafter\mod@newcommand\csname modules@#2@pres@qualified\endcsname[#3]{#4}}%
+{\expandafter\mod@newcommand\csname modules@#2@#3@qualified\endcsname[#4]{#5}}%
 \expandafter\g@addto@macro\this@qualified@module%
-{\expandafter\def\csname#2atqualified\endcsname{\csname modules@#2@pres@qualified\endcsname}}%
+{\expandafter\def\csname#2atqualified\endcsname{\csname modules@#2@#3@qualified\endcsname}}%
 \fi}% mod@qualified
 \fi% symdeflocal
 %    \end{macrocode}
@@ -1158,26 +1170,32 @@
 % \end{macro}
 %
 % \begin{macro}{\symvariant}
-%   |\symvariant{|\meta{sym}|}[|\meta{args}|]{|\meta{var}|}{|\meta{cseq}|}| just extends
-%   the internal macro |\modules@|\meta{sym}|@pres@| defined by
-%   |\symdef{|\meta{sym}|}[|\meta{args}|]{|\ldots|}| with a variant
-%   |\modules@|\meta{sym}|@pres@|\meta{var} which expands to \meta{cseq}. Recall that this
-%   is called by the macro |\|\meta{sym}|[|\meta{var}|]| induced by the
-%   |\symdef|.\ednote{MK@DG: this needs to be implemented in LaTeXML}
+%   |\symvariant{|\meta{sym}|}[|\meta{args}|]{|\meta{var}|}{|\meta{cseq}|}| just defines a
+%   variant |\modules@|\meta{sym}|@|\meta{mode}|@|\meta{var} which expands to
+%   \meta{cseq}. Recall that this is called by the macro |\|\meta{sym}|[|\meta{var}|]|
+%   induced by the |\symdef|. \ednote{MK@DG: this needs to be implemented in LaTeXML}
 %    \begin{macrocode}
-\def\symvariant#1{\@ifnextchar[{\@symvariant{#1}}{\@symvariant{#1}[0]}}
-\def\@symvariant#1[#2]#3#4{%
-\expandafter\mod@newcommand\csname modules@#1@pres@#3\endcsname[#2]{#4}%
+\def\symvariant#1{\@ifnextchar[{\@symvariant{#1}{math}}{\@symvariant{#1}{math}[0]}}
+\def\@symvariant#1#2[#3]#4#5{%
+\expandafter\mod@newcommand\csname modules@#1@#2@#4\endcsname[#3]{#5}%
 %    \end{macrocode}
 % and if we are in a named module, then we need to export the function
-% |\modules@|\meta{sym}|@pres@|\meta{opt} just as we have done that in |\symdef|.
+% |\modules@|\meta{sym}|@|\meta{mode}|@|\meta{opt} just as we have done that in |\symdef|.
 %    \begin{macrocode}
 \@ifundefined{mod@id}{}{%
 \expandafter\g@addto@macro\this@module%
-{\expandafter\mod@newcommand\csname modules@#1@pres@#3\endcsname[#2]{#4}}}}%
+{\expandafter\mod@newcommand\csname modules@#1@#2@#4\endcsname[#3]{#5}}}}%
 %    \end{macrocode}
 % \end{macro}
 %
+% \begin{macro}{\verbvariant}
+%   does the same as |\symvariant|, only for text mode. 
+%    \begin{macrocode}
+\def\verbvariant#1{\@ifnextchar[{\@symvariant{#1}{text}}{\@symvariant{#1}{text}[0]}}
+%    \end{macrocode}
+% \end{macro}
+%
+
 % \begin{macro}{\resymdef}
 %   This is now deprecated.
 %    \begin{macrocode}
