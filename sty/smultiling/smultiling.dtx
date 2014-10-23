@@ -225,8 +225,10 @@
 %   \end{sproof}
 % \end{gviewnl}
 % \end{verbatim}
-%   
+%
+% \begin{omgroup}{Verbalization Definitions}   
 % 
+% \end{omgroup}
 % \end{omgroup}
 % \end{omgroup}
 % 
@@ -347,15 +349,36 @@ DefKeyVal('modnl','primary','Semiverbatim');
 %    \end{macrocode}
 % \end{macro}
 %
+% \begin{macro}{\stex@lang}
+%   We define the internal register |\stex@lang| for the two-letter ISO 639 language
+%   identifier currently in effect. To always have it define we set it to |en| by default.
+%    \begin{macrocode}
+%<*sty>
+\newcommand\stex@lang{en}
+%</sty>
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\sTeXselectlanguage}
+%   redefines the current 
+%    \begin{macrocode}
+%<*sty>
+\newcommand\sTeXselectlanguage[1]{\def\stex@lang{#1}}
+%</sty>
+%    \end{macrocode}
+% \end{macro}
+%
 % \begin{environment}{modnl}
 %   The |modnl| environment is just a layer over the |module| environment and the
-%   |\importmodule| macro with the keys and language suitably adapted.
+%   |\importmodule| macro with the keys and language suitably adapted. It also sets
+%   |\stex@lang| accordingly for the language binding. 
 %    \begin{macrocode}
 %<*sty>
 \newenvironment{modnl}[3][]{\metasetkeys{modnl}{#1}%
 \def\@test{#1}\ifx\@test\@empty\begin{module}[id=#2.#3]\else\begin{module}[id=#2.#3,#1]\fi%
 \if@langfiles\importmodule[load=#2,ext=tex]{#2}\else
 \ifx\modnl@load\@empty\importmodule{#2}\else\importmodule[ext=tex,load=\modnl@load]{#2}\fi%
+\def\stex@lang{#1}
 \fi}
 {\end{module}}
 %</sty>
@@ -516,6 +539,26 @@ DefEnvironment('{mhmodnl} OptionalKeyVals:mhmodnl {}{}',
 % \end{macro}
 % \end{omgroup}
 % 
+% \begin{omgroup}{Verbalization Definitions}   
+% 
+% \begin{macro}{\verbdef}
+%   The the |\verbdef|, and |\@verbdef| macros just handle optional arguments, and hand
+%   off processing for text mode to |\@@symdef|.
+%    \begin{macrocode}
+\def\verbdef{\@ifnextchar[{\@verbdef}{\@verbdef[]}}
+\def\@verbdef[#1]#2{\@ifnextchar[{\@@symdef[#1]{#2}{text}}{\@@symdef[#1]{#2}{text}[0]}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\verbvariant}
+%   does the same as |\symvariant|, only for text mode. 
+%    \begin{macrocode}
+\def\verbvariant#1{\@ifnextchar[{\@symvariant{#1}{text}}{\@symvariant{#1}{text}[0]}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \end{omgroup}
+%
 % \begin{omgroup}{Finale}
 % Finally, we need to terminate the file with a success mark for perl.
 %    \begin{macrocode}

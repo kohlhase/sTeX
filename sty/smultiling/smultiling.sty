@@ -36,10 +36,13 @@
 \addmetakey*{modnl}{creators}
 \addmetakey*{modnl}{contributors}
 \addmetakey{primary}{contributors}[yes]
+\newcommand\stex@lang{en}
+\newcommand\sTeXselectlanguage[1]{\def\stex@lang{#1}}
 \newenvironment{modnl}[3][]{\metasetkeys{modnl}{#1}%
 \def\@test{#1}\ifx\@test\@empty\begin{module}[id=#2.#3]\else\begin{module}[id=#2.#3,#1]\fi%
 \if@langfiles\importmodule[load=#2,ext=tex]{#2}\else
 \ifx\modnl@load\@empty\importmodule{#2}\else\importmodule[ext=tex,load=\modnl@load]{#2}\fi%
+\def\stex@lang{#1}
 \fi}
 {\end{module}}
 \addmetakey{mhmodnl}{repos}

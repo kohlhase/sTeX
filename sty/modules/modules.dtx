@@ -1076,15 +1076,6 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\verbdef}
-%   The the |\verbdef|, and |\@verbdef| macros just handle optional arguments, and hand
-%   off processing for text mode to |\@@symdef|.
-%    \begin{macrocode}
-\def\verbdef{\@ifnextchar[{\@verbdef}{\@verbdef[]}}
-\def\@verbdef[#1]#2{\@ifnextchar[{\@@symdef[#1]{#2}{text}}{\@@symdef[#1]{#2}{text}[0]}}
-%    \end{macrocode}
-% \end{macro}
-%
 % next we locally abbreviate |\mod@newcommand| to simplify argument passing.
 %    \begin{macrocode}
 \def\@mod@nc#1{\mod@newcommand{#1}[1]}
@@ -1188,14 +1179,6 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\verbvariant}
-%   does the same as |\symvariant|, only for text mode. 
-%    \begin{macrocode}
-\def\verbvariant#1{\@ifnextchar[{\@symvariant{#1}{text}}{\@symvariant{#1}{text}[0]}}
-%    \end{macrocode}
-% \end{macro}
-%
-
 % \begin{macro}{\resymdef}
 %   This is now deprecated.
 %    \begin{macrocode}
