@@ -101,11 +101,16 @@
 \def\@symdef[#1]#2{\@ifnextchar[{\@@symdef[#1]{#2}{math}}{\@@symdef[#1]{#2}{math}[0]}}
 \def\@mod@nc#1{\mod@newcommand{#1}[1]}
 \def\@@symdef[#1]#2#3[#4]#5{%
+\message{XXXXXXX @@symdef: 1=#1, 2=#2, 3=#3, 4=#4,5=#5}
 \@symdeflocalfalse\metasetkeys{symdef}{#1}%
 \expandafter\mod@newcommand\csname modules@#2@#3@\endcsname[#4]{#5}%
+\ifmmode%
 \expandafter\mod@newcommand\csname #2\endcsname[1][]%
-{\ifmmode\csname modules@#2@math@##1\endcsname%
-\else\csname modules@#2@text@##1\endcsname\fi}%
+{\csname modules@#2@math@##1\endcsname}%
+\else
+\expandafter\mod@newcommand\csname #2\endcsname[1][]%
+{\csname modules@#2@text@##1\endcsname}%
+\fi
 \expandafter\@mod@nc\csname mod@symref@#2\expandafter\endcsname\expandafter%
 {\expandafter\mod@termref\expandafter{\mod@id}{#2}{##1}}%
 \if@symdeflocal\else%
@@ -413,3 +418,7 @@
 \endinput
 %%
 %% End of file `modules.sty'.
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "tast"
+%%% End: 
