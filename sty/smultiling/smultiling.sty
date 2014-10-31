@@ -71,6 +71,9 @@
 \def\@mtref#1?#2\relax{\termref[cd=#1,name=#2]}
 \newcommand\mtrefii[3][]{\mtrefi[#1]{#2 #3}}
 \newcommand\mtrefiii[4][]{\mtrefi[#1]{#2 #3 #4}}
+\def\verbdef{\@ifnextchar[{\@verbdef}{\@verbdef[]}}
+\def\@verbdef[#1]#2{\@ifnextchar[{\@@symdef[#1]{#2}{text}}{\@@symdef[#1]{#2}{text}[0]}}
+\def\verbvariant#1{\@ifnextchar[{\@symvariant{#1}{text}}{\@symvariant{#1}{text}[0]}}
 \endinput
 %%
 %% End of file `smultiling.sty'.

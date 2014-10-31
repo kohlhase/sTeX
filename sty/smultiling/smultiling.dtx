@@ -545,6 +545,7 @@ DefEnvironment('{mhmodnl} OptionalKeyVals:mhmodnl {}{}',
 %   The the |\verbdef|, and |\@verbdef| macros just handle optional arguments, and hand
 %   off processing for text mode to |\@@symdef|.
 %    \begin{macrocode}
+%<*sty>
 \def\verbdef{\@ifnextchar[{\@verbdef}{\@verbdef[]}}
 \def\@verbdef[#1]#2{\@ifnextchar[{\@@symdef[#1]{#2}{text}}{\@@symdef[#1]{#2}{text}[0]}}
 %    \end{macrocode}
@@ -554,6 +555,7 @@ DefEnvironment('{mhmodnl} OptionalKeyVals:mhmodnl {}{}',
 %   does the same as |\symvariant|, only for text mode. 
 %    \begin{macrocode}
 \def\verbvariant#1{\@ifnextchar[{\@symvariant{#1}{text}}{\@symvariant{#1}{text}[0]}}
+%</sty>
 %    \end{macrocode}
 % \end{macro}
 %
