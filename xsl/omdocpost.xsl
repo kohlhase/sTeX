@@ -41,6 +41,7 @@
 <xsl:include href="notations.xsl"/>
 <xsl:include href="symbols.xsl"/>
 <xsl:include href="math.xsl"/>
+
 <!-- old <xsl:include href="graphics.xsl"/>, replaced by LaTeXML treatment -->
 <!-- old <xsl:include href="listings.xsl"/>, replaced by LaTeXML treatment -->
 <xsl:include href="LaTeXML/LaTeXML-common.xsl"/>
