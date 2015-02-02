@@ -273,10 +273,10 @@
 \DeclareOption{book}{\def\omdoc@class{book}\PassOptionsToPackage{\CurrentOption}{omdoc}}
 \DeclareOption{showignores}{\PassOptionsToPackage{\CurrentOption}{omdoc}}
 \DeclareOption{showmods}{\PassOptionsToPackage{\CurrentOption}{modules}}
+\DeclareOption{showmeta}{\PassOptionsToPackage{\CurrentOption}{metakeys}}
 \DeclareOption{extrefs}{\PassOptionsToPackage{\CurrentOption}{sref}}
 \DeclareOption{noauxreq}{\PassOptionsToPackage{\CurrentOption}{modules}}
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{article}}
-\DeclareOption*{\PassOptionsToPackage{\CurrentOption}{omdoc}}
 \ProcessOptions
 %</cls>
 %<*ltxml.cls>
